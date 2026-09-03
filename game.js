@@ -347,10 +347,9 @@ function buildBoard() {
   let cell = Math.floor((avail - (tracks - 1) * gap) / tracks);
   cell = Math.max(18, Math.min(54, cell));
   state.cell = cell;
-  const unit = cell + gap;
   board.style.setProperty('--cell', cell + 'px');
-  board.style.gridTemplateColumns = 'repeat(' + state.clueCols + ', ' + unit + 'px) repeat(' + n + ', ' + unit + 'px)';
-  board.style.gridTemplateRows = 'repeat(' + state.clueRows + ', ' + unit + 'px) repeat(' + n + ', ' + unit + 'px)';
+  board.style.gridTemplateColumns = 'repeat(' + state.clueCols + ', ' + cell + 'px) repeat(' + n + ', ' + cell + 'px)';
+  board.style.gridTemplateRows = 'repeat(' + state.clueRows + ', ' + cell + 'px) repeat(' + n + ', ' + cell + 'px)';
   board.innerHTML = '';
   state.cellEls = [];
 
@@ -410,12 +409,14 @@ function buildBoard() {
 function applyAt(e) {
   if (!state) return;
   if (e.pointerType === 'mouse' && e.buttons === 0) return;
-  const rect = UI.boardEl.getBoundingClientRect();
-  const unit = state.cell + 2; // 格宽 + 间距
-  const x = e.clientX - rect.left;
-  const y = e.clientY - rect.top;
-  const c = Math.floor((x - state.clueCols * unit) / unit);
-  const r = Math.floor((y - state.clueRows * unit) / unit);
+  // 从实际 DOM 位置计算格子索引（不依赖 CSS 布局假设）
+  const el0 = state.cellEls[0].getBoundingClientRect();
+  const el1 = state.cellEls[1].getBoundingClientRect();
+  const elN = state.cellEls[state.n].getBoundingClientRect();
+  const pitchX = el1.left - el0.left;
+  const pitchY = elN.top - el0.top;
+  const c = Math.floor((e.clientX - el0.left) / pitchX);
+  const r = Math.floor((e.clientY - el0.top) / pitchY);
   if (r < 0 || r >= state.n || c < 0 || c >= state.n) return;
   paintCell(r, c);
 }
