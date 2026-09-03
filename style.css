@@ -119,7 +119,7 @@ body {
 .corner { background: #dfe3ec; border-radius: 3px; }
 .clue {
   background: #e9ecf4; border-radius: 3px; display: flex; align-items: center; justify-content: center;
-  font-weight: 700; color: #3a4152; font-size: calc(var(--cell) * .46); line-height: 1;
+  font-weight: 700; color: #3a4152; font-size: calc(var(--clue-cell, var(--cell)) * .46); line-height: 1;
   transition: background .15s, color .15s;
 }
 .clue.done { background: var(--green-soft); color: var(--green); }

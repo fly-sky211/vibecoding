@@ -324,9 +324,12 @@ function buildBoard() {
   let cell = Math.floor((avail - (tracks - 1) * gap) / tracks);
   cell = Math.max(18, Math.min(54, cell));
   state.cell = cell;
+  // 线索区轨道宽度独立于棋盘格子（数字不应被格子大小限制）
+  const clueCell = Math.max(24, cell + 2);
   board.style.setProperty('--cell', cell + 'px');
-  board.style.gridTemplateColumns = 'repeat(' + state.clueCols + ', ' + cell + 'px) repeat(' + n + ', ' + cell + 'px)';
-  board.style.gridTemplateRows = 'repeat(' + state.clueRows + ', ' + cell + 'px) repeat(' + n + ', ' + cell + 'px)';
+  board.style.setProperty('--clue-cell', clueCell + 'px');
+  board.style.gridTemplateColumns = 'repeat(' + state.clueCols + ', ' + clueCell + 'px) repeat(' + n + ', ' + cell + 'px)';
+  board.style.gridTemplateRows = 'repeat(' + state.clueRows + ', ' + clueCell + 'px) repeat(' + n + ', ' + cell + 'px)';
   board.innerHTML = '';
   state.cellEls = [];
 
