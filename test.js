@@ -129,6 +129,18 @@ console.log('== 生成关卡质量 ==');
       '第 ' + (i + 1) + ' 关：先定图案后定数字，二者严格一致'
     );
   });
+
+  // 线索区格子数：clueRows = 列提示最大段数，clueCols = 行提示最大段数，必须足够容纳全部数字
+  SAMPLE.forEach((i) => {
+    const lv = generateLevel(i);
+    const area = computeClueArea(lv.rowsClues, lv.colsClues);
+    const maxRowRuns = Math.max(...lv.rowsClues.map((a) => a.length));
+    const maxColRuns = Math.max(...lv.colsClues.map((a) => a.length));
+    assert(
+      area.clueRows >= maxColRuns && area.clueCols >= maxRowRuns,
+      '第 ' + (i + 1) + ' 关：线索区格子数(行' + area.clueCols + '/列' + area.clueRows + ')足够容纳全部数字'
+    );
+  });
 }
 
 // 15×15 硬性要求：连续生成 20 个 15×15 关卡（含高难度干扰黑格），绝不允许空行/空列

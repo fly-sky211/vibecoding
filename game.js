@@ -122,6 +122,16 @@ function countErrorsState(cells, solution, n) {
   return e;
 }
 
+// 计算线索区格子数（两阶段生成的数字直接决定布局容量）
+//  - clueRows：列提示区纵向格子数 = 列提示的最大段数
+//  - clueCols：行提示区横向格子数 = 行提示的最大段数
+function computeClueArea(rowsClues, colsClues) {
+  return {
+    clueRows: Math.max(1, ...colsClues.map((a) => a.length)),
+    clueCols: Math.max(1, ...rowsClues.map((a) => a.length)),
+  };
+}
+
 // 提示选格：优先找该填黑却未填（空白/问号）的格子，其次找未确定的空白格；无可提示返回 -1
 function pickHintCell(cells, solution, locked, n) {
   for (let i = 0; i < n * n; i++) {
@@ -282,6 +292,7 @@ function startLevel(idx) {
   const lv = generateLevel(idx); // 自动生成：先确定图案(grid)，再确定数字(rowsClues/colsClues)
   if (!lv) return;
   const n = lv.size;
+  const area = computeClueArea(lv.rowsClues, lv.colsClues);
   state = {
     idx: idx,
     lv: lv,
@@ -289,8 +300,8 @@ function startLevel(idx) {
     solution: solutionArray(lv),
     rowsClues: lv.rowsClues,
     colsClues: lv.colsClues,
-    clueRows: Math.max(1, ...lv.rowsClues.map((a) => a.length)),
-    clueCols: Math.max(1, ...lv.colsClues.map((a) => a.length)),
+    clueRows: area.clueRows,
+    clueCols: area.clueCols,
     cells: new Uint8Array(n * n),
     locked: new Uint8Array(n * n),
     rowSolved: new Array(n).fill(false),
