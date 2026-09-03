@@ -33,6 +33,31 @@ body {
 .subtitle { color: var(--muted); font-size: 14px; margin-bottom: 30px; }
 
 #level-list { display: block; }
+.menu-cols { display: flex; gap: 22px; justify-content: center; align-items: flex-start; flex-wrap: wrap; }
+.menu-col-main { flex: 1 1 460px; min-width: 280px; }
+.menu-col-endless { flex: 0 1 260px; min-width: 220px; }
+.endless-tip { font-size: 12px; color: var(--muted); margin-bottom: 10px; }
+.endless-list { display: flex; flex-direction: column; gap: 12px; }
+.endless-card {
+  background: var(--card); border-radius: 16px; padding: 14px;
+  box-shadow: 0 6px 18px rgba(43, 47, 58, .08); border: 2px solid #f5b93c;
+  text-align: left;
+}
+.ec-top { display: flex; align-items: center; justify-content: space-between; }
+.ec-title { font-size: 15px; font-weight: 800; color: #b57d00; }
+.ec-reroll {
+  border: 1px solid var(--line); background: #fff8e8; color: #b57d00;
+  border-radius: 999px; width: 34px; height: 34px; font-size: 16px; cursor: pointer;
+  font-family: inherit; transition: transform .1s;
+}
+.ec-reroll:hover { background: #fceec8; transform: scale(1.05); }
+.ec-name { font-size: 14px; font-weight: 700; margin: 8px 0 10px; color: var(--ink); }
+.ec-play {
+  width: 100%; border: none; border-radius: 10px; background: var(--accent);
+  color: #fff; font-size: 14px; font-weight: 700; padding: 9px 0; cursor: pointer;
+  font-family: inherit;
+}
+.ec-play:hover { background: #3b63e0; }
 .level-group-title {
   margin: 22px 0 12px; font-size: 14px; font-weight: 700; color: var(--ink);
   display: flex; align-items: center; gap: 10px;

@@ -438,3 +438,25 @@ function generateLevel(levelIndex) {
   }
   return fallbackLevel(levelIndex, size);
 }
+
+// 随机生成一个指定尺寸的无尽关卡（每次调用结果随机；两阶段：先图案后数字）
+function generateRandomLevel(size) {
+  const rng = mulberry32(Math.floor(Math.random() * 0x7fffffff));
+  const ordered = shapesSortedByComplexity(size);
+  const tryOrder = [];
+  for (let i = 0; i < ordered.length; i++) tryOrder.push(i);
+  for (let i = tryOrder.length - 1; i > 0; i--) {
+    const j = Math.floor(rng() * (i + 1));
+    const tmp = tryOrder[i]; tryOrder[i] = tryOrder[j]; tryOrder[j] = tmp;
+  }
+  for (const idx of tryOrder) {
+    const sh = ordered[idx];
+    const grid = drawShape(size, sh.paint);
+    if (!everyLineHasBlack(grid)) continue;
+    if (countSolutionsBudget(grid, size, 60000) === 1) {
+      const clues = computeClues(grid);
+      return { levelIndex: -1, size, name: sh.name, grid, rowsClues: clues.rows, colsClues: clues.cols };
+    }
+  }
+  return fallbackLevel(-1, size);
+}

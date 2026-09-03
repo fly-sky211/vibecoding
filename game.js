@@ -161,6 +161,7 @@ function initGame() {
     menuScreen: document.querySelector('#menu'),
     gameScreen: document.querySelector('#game'),
     levelListEl: document.querySelector('#level-list'),
+    endlessListEl: document.querySelector('#endless-list'),
     boardEl: document.querySelector('#board'),
     levelTitle: document.querySelector('#level-title'),
     timerEl: document.querySelector('#timer'),
@@ -181,11 +182,22 @@ function initGame() {
   });
   const saved = loadProgress();
   UI.completed = saved.completed; // 已通关关卡 [{idx, name, size}]（名字通关后才记录）
+  UI.endless = {};                // 无尽随机缓存：{9/12/15: 关卡对象}
 
   UI.btnBack.addEventListener('click', toMenu);
-  UI.btnRestart.addEventListener('click', () => { hideModal(); if (state) startLevel(state.idx); });
+  UI.btnRestart.addEventListener('click', () => {
+    hideModal();
+    if (!state) return;
+    if (state.isEndless) startLevel(-1, state.lv); // 重开同一个随机关卡
+    else startLevel(state.idx);
+  });
   UI.btnHint.addEventListener('click', applyHint);
-  UI.btnNext.addEventListener('click', () => { hideModal(); if (state) startLevel(state.idx + 1); });
+  UI.btnNext.addEventListener('click', () => {
+    hideModal();
+    if (!state) return;
+    if (state.isEndless) startLevel(-1, UI.endless[state.endlessSize]); // 已自动生成下一关
+    else startLevel(state.idx + 1);
+  });
   UI.btnMenu.addEventListener('click', () => { hideModal(); toMenu(); });
   UI.btnReset.addEventListener('click', () => {
     if (confirm('确定要重置全部通关进度吗？')) {
@@ -258,6 +270,7 @@ function renderMenu() {
     for (let i = g.from; i < g.to; i++) grid.appendChild(levelCard(i));
     el.appendChild(grid);
   });
+  renderEndlessMenu();
 }
 
 // 单个关卡卡片（自由选择，点击即玩；名字通关后才揭晓）
@@ -277,6 +290,41 @@ function levelCard(i) {
   return card;
 }
 
+// 无尽随机入口：3 个尺寸各一张卡片，点击游玩当前随机关卡，🎲 可手动换一关
+const ENDLESS_SIZES = [9, 12, 15];
+function renderEndlessMenu() {
+  const el = UI.endlessListEl;
+  if (!el) return;
+  el.innerHTML = '';
+  ENDLESS_SIZES.forEach((size) => {
+    const lv = ensureEndless(size);
+    const card = document.createElement('div');
+    card.className = 'endless-card';
+    const title = '无尽 · ' + size + ' × ' + size;
+    card.innerHTML =
+      '<div class="ec-top"><span class="ec-title">' + title + '</span>' +
+      '<button class="ec-reroll" title="换一关">🎲</button></div>' +
+      '<div class="ec-name">' + (lv ? '？？？' : '——') + '</div>' +
+      '<button class="ec-play">▶ 开始挑战</button>';
+    card.querySelector('.ec-reroll').addEventListener('click', (e) => {
+      e.stopPropagation();
+      UI.endless[size] = generateRandomLevel(size);
+      showToast(title + ' 已换新，图案名通关后揭晓');
+      renderEndlessMenu();
+    });
+    card.querySelector('.ec-play').addEventListener('click', () => {
+      startLevel(-1, UI.endless[size] || generateRandomLevel(size));
+    });
+    el.appendChild(card);
+  });
+}
+
+// 取指定尺寸的随机关卡（无缓存则生成）
+function ensureEndless(size) {
+  if (!UI.endless[size]) UI.endless[size] = generateRandomLevel(size);
+  return UI.endless[size];
+}
+
 function toMenu() {
   stopTimer();
   painting = false;
@@ -289,14 +337,16 @@ function toMenu() {
 
 /* ----------------------------- 开局与棋盘 ----------------------------- */
 
-function startLevel(idx) {
-  const lv = generateLevel(idx); // 自动生成：先确定图案(grid)，再确定数字(rowsClues/colsClues)
+function startLevel(idx, endlessLv) {
+  const lv = endlessLv || generateLevel(idx); // 自动生成：先确定图案(grid)，再确定数字(rowsClues/colsClues)
   if (!lv) return;
   const n = lv.size;
   const area = computeClueArea(lv.rowsClues, lv.colsClues);
   state = {
     idx: idx,
     lv: lv,
+    isEndless: !!endlessLv,
+    endlessSize: endlessLv ? lv.size : null,
     n: n,
     solution: solutionArray(lv),
     rowsClues: lv.rowsClues,
@@ -319,9 +369,13 @@ function startLevel(idx) {
   updateClueStyles();
   updateProgress();
   updateToolbar();
-  // 名字通关前不显示，通关（或重玩已通关关卡）后才显示
-  UI.levelTitle.textContent = '第 ' + (idx + 1) + ' 关 · ' + lv.size + '×' + lv.size +
-    (UI.completed[idx] ? ' · ' + lv.name : '');
+  // 无尽随机：显示"无尽 · 尺寸"；固定关卡：名字通关前不显示
+  if (state.isEndless) {
+    UI.levelTitle.textContent = '无尽随机 · ' + lv.size + '×' + lv.size + ' · ？？？';
+  } else {
+    UI.levelTitle.textContent = '第 ' + (idx + 1) + ' 关 · ' + lv.size + '×' + lv.size +
+      (UI.completed[idx] ? ' · ' + lv.name : '');
+  }
   UI.menuScreen.classList.remove('active');
   UI.gameScreen.classList.add('active');
   window.scrollTo(0, 0);
@@ -523,6 +577,18 @@ function applyHint() {
 
 function win() {
   stopTimer();
+  if (state.isEndless) {
+    // 无尽随机：通关后自动为同尺寸生成下一关（不记录固定进度）
+    UI.endless[state.endlessSize] = generateRandomLevel(state.endlessSize);
+    UI.modalTextEl.innerHTML =
+      '本关图案是「<b>' + state.lv.name + '</b>」！<br>' +
+      '用时 <b>' + formatTime(timerElapsed()) + '</b>，涂改 <b>' + state.paints + '</b> 次。<br>' +
+      '已自动生成下一关，继续挑战吧！';
+    renderPatternPreview();
+    UI.btnNext.style.display = '';
+    UI.modalEl.classList.remove('hidden');
+    return;
+  }
   // 记录通关（按关卡索引，不依赖顺序）
   if (!UI.completed[state.idx]) {
     UI.completed[state.idx] = { name: state.lv.name, size: state.lv.size };
