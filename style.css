@@ -165,6 +165,12 @@ body {
 .modal-emoji { font-size: 48px; }
 .modal-box h2 { margin: 10px 0 8px; font-size: 22px; }
 #modal-text { color: #5b6270; font-size: 14px; line-height: 1.9; }
+.pattern-preview {
+  display: inline-grid; gap: 2px; background: #c7ccd8; border-radius: 8px;
+  padding: 4px; margin: 14px auto 4px;
+}
+.pp-cell { background: #fff; border-radius: 1px; }
+.pp-black { background: #262b36; }
 .modal-buttons { display: flex; gap: 10px; justify-content: center; margin-top: 20px; }
 @keyframes pop {
   from { transform: scale(.8); opacity: 0; }
