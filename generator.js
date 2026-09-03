@@ -406,10 +406,12 @@ function fallbackLevel(levelIndex, size) {
     for (let c = 0; c < size; c++) row += c <= r ? '#' : '.';
     grid.push(row);
   }
-  return { levelIndex, size, name: '三角', grid };
+  const clues = computeClues(grid);
+  return { levelIndex, size, name: '三角', grid, rowsClues: clues.rows, colsClues: clues.cols };
 }
 
 // 生成第 levelIndex 关（确定性：同一编号永远同一谜题）
+// 两阶段流程：先确定图案（grid），再从图案确定数字（rowsClues / colsClues）
 // 图案必须严格符合行列数字：求解器验证唯一解，不唯一则按种子顺序换图案重试
 function generateLevel(levelIndex) {
   const size = sizeForLevel(levelIndex);
@@ -430,7 +432,8 @@ function generateLevel(levelIndex) {
     const grid = drawShape(size, sh.paint);
     if (!everyLineHasBlack(grid)) continue;
     if (countSolutionsBudget(grid, size, 60000) === 1) {
-      return { levelIndex, size, name: sh.name, grid };
+      const clues = computeClues(grid);
+      return { levelIndex, size, name: sh.name, grid, rowsClues: clues.rows, colsClues: clues.cols };
     }
   }
   return fallbackLevel(levelIndex, size);

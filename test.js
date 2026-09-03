@@ -118,6 +118,17 @@ console.log('== 生成关卡质量 ==');
     seen.add(key);
   }
   assert(allDiff, '第 1~5 关图案互不相同（回归：不再出现重复关）');
+
+  // 两阶段一致性：生成器返回的数字必须严格由图案推导
+  SAMPLE.forEach((i) => {
+    const lv = generateLevel(i);
+    const rec = computeClues(lv.grid);
+    assert(
+      JSON.stringify(lv.rowsClues) === JSON.stringify(rec.rows) &&
+      JSON.stringify(lv.colsClues) === JSON.stringify(rec.cols),
+      '第 ' + (i + 1) + ' 关：先定图案后定数字，二者严格一致'
+    );
+  });
 }
 
 // 15×15 硬性要求：连续生成 20 个 15×15 关卡（含高难度干扰黑格），绝不允许空行/空列

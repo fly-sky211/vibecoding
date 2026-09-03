@@ -301,19 +301,18 @@ function toMenu() {
 /* ----------------------------- 开局与棋盘 ----------------------------- */
 
 function startLevel(idx) {
-  const lv = generateLevel(idx); // 自动生成（确定性：同一编号同一谜题）
+  const lv = generateLevel(idx); // 自动生成：先确定图案(grid)，再确定数字(rowsClues/colsClues)
   if (!lv) return;
   const n = lv.size;
-  const clues = computeClues(lv.grid);
   state = {
     idx: idx,
     lv: lv,
     n: n,
     solution: solutionArray(lv),
-    rowsClues: clues.rows,
-    colsClues: clues.cols,
-    clueRows: Math.max(1, ...clues.rows.map((a) => a.length)),
-    clueCols: Math.max(1, ...clues.cols.map((a) => a.length)),
+    rowsClues: lv.rowsClues,
+    colsClues: lv.colsClues,
+    clueRows: Math.max(1, ...lv.rowsClues.map((a) => a.length)),
+    clueCols: Math.max(1, ...lv.colsClues.map((a) => a.length)),
     cells: new Uint8Array(n * n),
     locked: new Uint8Array(n * n),
     rowSolved: new Array(n).fill(false),
