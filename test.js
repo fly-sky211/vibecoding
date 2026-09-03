@@ -261,9 +261,9 @@ console.log('== 错误计数 / 提示选格 / 问号标记 ==');
   const sol = solutionArray({ size: n, grid: heart });
   const cells = new Uint8Array(n * n);
   assert(countErrorsState(cells, sol, n) === 0, '错误计数：空盘为 0');
-  cells[0] = 1;            // 答案白处画黑
-  cells[sol.indexOf(1)] = 2; // 答案黑处标白
-  cells[1] = 3;            // 问号不计错
+  cells[0] = 1;            // 答案白处画黑（heart 第 1 格是 '.'）
+  cells[1] = 2;            // 答案黑处标白（heart 第 2 格是 '#'）
+  cells[2] = 3;            // 问号标在第 3 格（'.'），不计错
   assert(countErrorsState(cells, sol, n) === 2, '错误计数：黑/白标错各计 1，问号不计');
 }
 {
@@ -278,8 +278,10 @@ console.log('== 错误计数 / 提示选格 / 问号标记 ==');
   cells[firstBlack] = 1;
   const second = sol.indexOf(1, firstBlack + 1);
   assert(pickHintCell(cells, sol, locked, n) === second, '提示选格：继续提示下一个未填黑格');
-  const full = new Uint8Array(sol); // 黑格全填
-  assert(pickHintCell(full, sol, locked, n) === -1, '提示选格：全部黑格填对后无可提示');
+  // 黑格全填 + 白格全标（cells: 黑=1 白=2）→ 全部确定，无可提示
+  const full = new Uint8Array(n * n);
+  for (let i = 0; i < full.length; i++) full[i] = sol[i] === 1 ? 1 : 2;
+  assert(pickHintCell(full, sol, locked, n) === -1, '提示选格：全部格子确定后无可提示');
   // 锁定格不可被提示
   const locked2 = new Uint8Array(n * n);
   locked2.fill(1);
