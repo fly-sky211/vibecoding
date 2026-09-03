@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+  <meta name="theme-color" content="#edf1fb" />
+  <title>数织 Nonogram 游戏</title>
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <!-- ================= 选关界面（无尽模式） ================= -->
+  <section id="menu" class="screen active">
+    <div class="menu-inner">
+      <h1 class="logo">🧩 数织 <span>无尽模式</span></h1>
+      <p class="subtitle">看行列数字提示，推理出隐藏图案 · 图案名通关后才揭晓</p>
+
+      <div id="next-level" class="next-card"></div>
+
+      <div class="section-title">已通关（点击可重玩）</div>
+      <div id="level-list" class="level-list"></div>
+
+      <div class="howto">
+        <p><b>玩法说明</b></p>
+        <p>• 每行/列的数字 = 该方向连续黑格的段长，如「3 2」表示先涂 3 格、隔开再涂 2 格</p>
+        <p>• 用 <b>涂黑</b> 填充黑格、<b>涂白</b> 标记空白、<b>擦除</b> 撤销涂色</p>
+        <p>• 某行或某列的黑格<b>全部正确</b>时，自动填充其余白色并锁定</p>
+        <p>• 提示变绿 = 该行/列完成；变红 = 有矛盾</p>
+        <p>• 无尽模式：9×9 → 12×12 → 15×15，难度不断攀升，15×15 每行每列必有黑格</p>
+      </div>
+
+      <button id="btn-reset-progress" class="link-btn">重置进度</button>
+    </div>
+  </section>
+
+  <!-- ================= 游戏界面 ================= -->
+  <section id="game" class="screen">
+    <div class="game-inner">
+      <header class="game-header">
+        <button id="btn-back" class="btn ghost">← 选关</button>
+        <div class="mid">
+          <h2 id="level-title"></h2>
+          <div class="meta-row">
+            <span class="chip" id="timer">⏱ 00:00</span>
+            <span class="chip" id="left-count"></span>
+            <span class="chip" id="err-count">错误 0</span>
+            <span class="chip" id="progress-text"></span>
+          </div>
+          <div class="progress"><div id="progress-fill"></div></div>
+        </div>
+        <button id="btn-restart" class="btn ghost">↻ 重开</button>
+      </header>
+
+      <div id="board-wrap">
+        <div id="board"></div>
+      </div>
+
+      <div id="toolbar">
+        <button class="tool active" data-tool="black"><span class="t-icon t-black"></span>涂黑<kbd>1</kbd></button>
+        <button class="tool" data-tool="white"><span class="t-icon t-white"></span>涂白<kbd>2</kbd></button>
+        <button class="tool" data-tool="erase"><span class="t-icon t-erase"></span>擦除<kbd>3</kbd></button>
+        <button class="tool" data-tool="question"><span class="t-icon t-question">?</span>标记<kbd>4</kbd></button>
+        <button id="btn-hint" class="tool hint-tool">💡 提示<kbd>H</kbd></button>
+      </div>
+      <p class="hint">提示：按住拖动可连续涂色 · 快捷键 1 涂黑 / 2 涂白 / 3 擦除 / 4 标记 / H 提示</p>
+    </div>
+  </section>
+
+  <!-- ================= 通关弹窗 ================= -->
+  <div id="modal" class="hidden">
+    <div class="modal-box">
+      <div class="modal-emoji">🎉</div>
+      <h2>恭喜通关！</h2>
+      <p id="modal-text"></p>
+      <div class="modal-buttons">
+        <button id="btn-next" class="btn primary">下一关 ➜</button>
+        <button id="btn-menu" class="btn ghost">返回选关</button>
+      </div>
+    </div>
+  </div>
+
+  <div id="toast"></div>
+
+  <script src="game.js"></script>
+  <script src="generator.js"></script>
+</body>
+</html>
