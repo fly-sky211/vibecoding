@@ -190,6 +190,7 @@ function initGame() {
     toastEl: document.querySelector('#toast'),
     modalEl: document.querySelector('#modal'),
     modalTextEl: document.querySelector('#modal-text'),
+    patternPreviewEl: document.querySelector('#pattern-preview'),
     btnNext: document.querySelector('#btn-next'),
     btnMenu: document.querySelector('#btn-menu'),
     btnBack: document.querySelector('#btn-back'),
@@ -556,8 +557,27 @@ function win() {
     '本关图案是「<b>' + state.lv.name + '</b>」！<br>' +
     '用时 <b>' + formatTime(timerElapsed()) + '</b>，涂改 <b>' + state.paints + '</b> 次。<br>' +
     '第 ' + (state.idx + 2) + ' 关已就绪，继续挑战吧！';
+  renderPatternPreview();
   UI.btnNext.style.display = ''; // 无尽模式永远有下一关
   UI.modalEl.classList.remove('hidden');
+}
+
+// 通关弹窗里渲染完成的图案（迷你网格预览）
+function renderPatternPreview() {
+  const el = UI.patternPreviewEl;
+  if (!el) return;
+  const n = state.n;
+  const cell = Math.max(6, Math.min(14, Math.floor(160 / n)));
+  el.innerHTML = '';
+  el.style.gridTemplateColumns = 'repeat(' + n + ', ' + cell + 'px)';
+  el.style.gridTemplateRows = 'repeat(' + n + ', ' + cell + 'px)';
+  for (let r = 0; r < n; r++) {
+    for (let c = 0; c < n; c++) {
+      const d = document.createElement('div');
+      d.className = 'pp-cell' + (state.solution[r * n + c] ? ' pp-black' : '');
+      el.appendChild(d);
+    }
+  }
 }
 
 /* ----------------------------- 计时 / 提示 / 弹窗 ----------------------------- */
@@ -632,4 +652,4 @@ function saveProgress() {
 }
 
 /* ----------------------------- 启动 ----------------------------- */
-if (typeof document !== 'undefined') initGame();
+// initGame() 在 index.html 中两个 script 加载完成后调用
